@@ -10,7 +10,7 @@
     "image": "/assets/instruments/suling-bambu/instrument.png",
     "poster": "/assets/instruments/suling-bambu/poster.webp",
     "model": "/assets/seruling_bambu.glb",
-    "audio": "/assets/instruments/suling-bambu/sound.mp3",
+    "audio": "/assets/suling-sound.wav",
     "video": "/assets/seruling-video.mp4",
     "description": "Suling bambu adalah alat musik tiup tradisional yang terbuat dari seruas bambu dengan beberapa lubang nada. Suaranya lembut dan mengalun, sering mengiringi gamelan atau lagu daerah.",
     "history": "Suling telah dikenal di Nusantara sejak berabad-abad lalu dan berkembang dalam berbagai bentuk, dari suling Sunda berlubang enam hingga suling Bali. Bambu dipilih karena ringan, mudah dibentuk, dan menghasilkan resonansi yang hangat.",

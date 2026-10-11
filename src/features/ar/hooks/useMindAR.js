@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ensureMindAR } from '../services/scriptLoader.js';
+import { registerARComponents } from '../services/arComponents.js';
 import { TARGETS_MIND_PATH, getTargetConfig } from '../services/targetRegistry.js';
 import { assetUrl } from '@/utils/media.js';
 import { canRunAR, isSecureContextForCamera } from '@/utils/device.js';
@@ -93,6 +94,7 @@ export function useMindAR({ onTargetFound, onTargetLost, onCameraReady } = {}) {
 
     try {
       await ensureMindAR();
+      registerARComponents(); // custom components must exist before the scene mounts
     } catch {
       setErrorType('load');
       setStatus('error');

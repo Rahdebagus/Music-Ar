@@ -61,12 +61,12 @@ export function InstrumentOverlay({ instrument }) {
   return (
     <a-entity>
       {hasModel ? (
+        // Centered on the target; user rotates (drag) & scales (pinch/wheel)
+        // via the `ar-model-control` component (auto-centers + fits on load).
         <a-gltf-model
           src={assetUrl(instrument.model)}
-          position="0 0 0.15"
-          rotation="0 0 0"
-          scale="0.25 0.25 0.25"
-          animation="property: rotation; to: 0 360 0; loop: true; dur: 9000; easing: linear"
+          position="0 0 0.1"
+          ar-model-control="fit: 0.9"
         ></a-gltf-model>
       ) : (
         <>

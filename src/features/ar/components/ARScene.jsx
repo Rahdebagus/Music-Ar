@@ -36,10 +36,20 @@ export function ARScene({ lowPerf = false, preferInstrumentId, onExit }) {
   const [muted, setMuted] = useState(false);
 
   const indices = useMemo(() => getTargetIndices(), []);
+  // Any target whose instrument has a video gets a (lazy) hidden <video>,
+  // so audio+video controls work even in the 3D-model (instrument) mode.
   const videoIndices = useMemo(
-    () => indices.filter((i) => getTargetConfig(i)?.mode === AR_MODES.VIDEO),
+    () =>
+      indices.filter(
+        (i) => getInstrumentById(getTargetConfig(i)?.instrumentId)?.video
+      ),
     [indices]
   );
+
+  const hidePlane = (index) => {
+    const p = document.getElementById(`ar-vplane-${index}`);
+    if (p) p.setAttribute('visible', 'false');
+  };
 
   const handleTargetFound = useCallback(
     (index, config) => {
@@ -54,6 +64,9 @@ export function ARScene({ lowPerf = false, preferInstrumentId, onExit }) {
     audio.pause();
     const vids = document.querySelectorAll('[data-ar-video]');
     vids.forEach((v) => v.pause());
+    document
+      .querySelectorAll('[id^="ar-vplane-"]')
+      .forEach((p) => p.setAttribute('visible', 'false'));
     setVideoPlaying(false);
     setInfoOpen(false);
     setSelectedPart(null);
@@ -101,9 +114,10 @@ export function ARScene({ lowPerf = false, preferInstrumentId, onExit }) {
     return () => scene.removeEventListener('click', onClick);
   }, [sceneMounted, sceneRef]);
 
-  // Keep the active video element's play state in sync with UI.
+  // Keep the active video element's play state in sync with UI. Works for any
+  // active target whose instrument has a video (not only the VIDEO mode).
   const activeVideoEl = () =>
-    activeTarget?.mode === AR_MODES.VIDEO
+    activeTarget != null && instrument?.video
       ? document.getElementById(`ar-video-${activeTarget.index}`)
       : null;
 
@@ -130,12 +144,19 @@ export function ARScene({ lowPerf = false, preferInstrumentId, onExit }) {
 
   const toggleVideo = useCallback(() => {
     const v = activeVideoEl();
-    if (!v) return;
-    v.muted = muted;
-    if (v.paused) v.play().catch(() => {});
-    else v.pause();
+    if (!v || activeTarget == null) return;
+    const plane = document.getElementById(`ar-vplane-${activeTarget.index}`);
+    if (v.paused) {
+      // Pause instrument audio so the two don't overlap.
+      audio.pause();
+      v.muted = muted;
+      if (plane) plane.setAttribute('visible', 'true');
+      v.play().catch(() => {});
+    } else {
+      v.pause();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [muted, activeTarget?.index]);
+  }, [muted, audio, activeTarget?.index, instrument]);
 
   const toggleMute = useCallback(() => {
     setMuted((m) => {
@@ -158,6 +179,10 @@ export function ARScene({ lowPerf = false, preferInstrumentId, onExit }) {
         /* ignore */
       }
     }
+    if (activeTarget != null) hidePlane(activeTarget.index);
+    // Reset the 3D model's rotation/scale back to the fitted default.
+    const modelEl = sceneRef.current?.querySelector('[ar-model-control]');
+    modelEl?.components?.['ar-model-control']?.resetTransform();
     setInfoOpen(false);
     setSelectedPart(null);
     resetTracking();
@@ -252,6 +277,20 @@ export function ARScene({ lowPerf = false, preferInstrumentId, onExit }) {
                   <ConceptOverlay instrument={inst} lowPerf={lowPerf} />
                 )}
                 {cfg.mode === AR_MODES.VIDEO && <VideoOverlay index={i} />}
+
+                {/* On-demand video plane: for non-VIDEO targets that still
+                    have a video, hidden until the user taps the Video button. */}
+                {cfg.mode !== AR_MODES.VIDEO && inst.video && (
+                  <a-video
+                    id={`ar-vplane-${i}`}
+                    src={`#ar-video-${i}`}
+                    visible="false"
+                    position="0 0.95 0.05"
+                    width="1"
+                    height="0.5625"
+                    material="shader: flat"
+                  ></a-video>
+                )}
               </a-entity>
             );
           })}
@@ -321,7 +360,8 @@ export function ARScene({ lowPerf = false, preferInstrumentId, onExit }) {
         {/* Toolbar */}
         {activeTarget && (
           <ARToolbar
-            mode={mode}
+            showAudio={!!instrument?.audio}
+            showVideo={!!instrument?.video}
             audioPlaying={audio.playing}
             videoPlaying={videoPlaying}
             muted={muted}

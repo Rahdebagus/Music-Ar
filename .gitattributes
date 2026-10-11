@@ -4,6 +4,8 @@
 # Treat media/model assets as binary (no EOL/diff munging).
 *.glb binary
 *.mp4 binary
+*.wav binary
+*.mp3 binary
 *.png binary
 *.webp binary
 *.mind binary

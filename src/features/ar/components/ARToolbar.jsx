@@ -1,13 +1,14 @@
 import { cn } from '@/utils/cn.js';
-import { AR_MODES } from '../services/targetRegistry.js';
 
 /**
- * HTML overlay toolbar shown while a target is active. Buttons adapt to the
- * active mode (sound for concept, video for video mode, info always).
- * Sits above the camera canvas with high-contrast styling.
+ * HTML overlay toolbar shown while a target is active. Buttons reflect what
+ * the active instrument offers: a Sound button when it has audio, a Video
+ * button (+ mute) when it has a video — plus Info and Reset always. Sits above
+ * the camera canvas with high-contrast styling.
  */
 export function ARToolbar({
-  mode,
+  showAudio,
+  showVideo,
   audioPlaying,
   videoPlaying,
   onToggleAudio,
@@ -23,7 +24,7 @@ export function ARToolbar({
       style={{ paddingBottom: 'calc(1.5rem + var(--safe-bottom))' }}
     >
       <div className="flex items-center gap-2 rounded-full bg-black/55 p-2 backdrop-blur">
-        {mode === AR_MODES.CONCEPT && (
+        {showAudio && (
           <ToolButton
             label={audioPlaying ? 'Jeda' : 'Suara'}
             icon={audioPlaying ? '⏸' : '🔊'}
@@ -32,7 +33,7 @@ export function ARToolbar({
           />
         )}
 
-        {mode === AR_MODES.VIDEO && (
+        {showVideo && (
           <>
             <ToolButton
               label={videoPlaying ? 'Jeda' : 'Video'}
@@ -40,11 +41,13 @@ export function ARToolbar({
               active={videoPlaying}
               onClick={onToggleVideo}
             />
-            <ToolButton
-              label={muted ? 'Suara' : 'Bisu'}
-              icon={muted ? '🔇' : '🔈'}
-              onClick={onToggleMute}
-            />
+            {videoPlaying && (
+              <ToolButton
+                label={muted ? 'Bunyikan' : 'Bisu'}
+                icon={muted ? '🔇' : '🔈'}
+                onClick={onToggleMute}
+              />
+            )}
           </>
         )}
 
