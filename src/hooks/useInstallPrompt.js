@@ -1,0 +1,47 @@
+import { useCallback, useEffect, useState } from 'react';
+
+/**
+ * Captures the PWA "beforeinstallprompt" event (Chrome/Android) so the app
+ * can offer an in-app "Install" button. Also reports whether the app is
+ * already running installed (standalone display mode).
+ */
+export function useInstallPrompt() {
+  const [deferred, setDeferred] = useState(null);
+  const [installed, setInstalled] = useState(false);
+
+  useEffect(() => {
+    const standalone =
+      window.matchMedia?.('(display-mode: standalone)').matches ||
+      window.navigator.standalone === true;
+    setInstalled(Boolean(standalone));
+
+    const onPrompt = (e) => {
+      e.preventDefault();
+      setDeferred(e);
+    };
+    const onInstalled = () => {
+      setInstalled(true);
+      setDeferred(null);
+    };
+    window.addEventListener('beforeinstallprompt', onPrompt);
+    window.addEventListener('appinstalled', onInstalled);
+    return () => {
+      window.removeEventListener('beforeinstallprompt', onPrompt);
+      window.removeEventListener('appinstalled', onInstalled);
+    };
+  }, []);
+
+  const promptInstall = useCallback(async () => {
+    if (!deferred) return false;
+    deferred.prompt();
+    try {
+      const { outcome } = await deferred.userChoice;
+      setDeferred(null);
+      return outcome === 'accepted';
+    } catch {
+      return false;
+    }
+  }, [deferred]);
+
+  return { canInstall: Boolean(deferred), installed, promptInstall };
+}

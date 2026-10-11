@@ -1,0 +1,72 @@
+{
+  "title": "Kuis Alat Musik & Bunyi",
+  "description": "Uji pemahamanmu tentang alat musik tradisional dan konsep bunyinya.",
+  "questions": [
+    {
+      "id": "q1",
+      "question": "Dari daerah manakah angklung berasal?",
+      "options": ["Jawa Barat (Sunda)", "Bali", "Nusa Tenggara Timur", "Sumatra Utara"],
+      "answerIndex": 0,
+      "explanation": "Angklung berasal dari masyarakat Sunda, Jawa Barat, dan diakui UNESCO sebagai Warisan Budaya Takbenda."
+    },
+    {
+      "id": "q2",
+      "question": "Suling bambu dimainkan dengan cara...",
+      "options": ["Dipetik", "Dipukul", "Ditiup", "Digoyangkan"],
+      "answerIndex": 2,
+      "explanation": "Suling adalah aerophone: bunyi muncul karena kolom udara di dalam tabung bergetar saat ditiup."
+    },
+    {
+      "id": "q3",
+      "question": "Bagian kendang yang menjadi sumber getaran utama adalah...",
+      "options": ["Tali penegang", "Membran kulit", "Badan kayu", "Pemukul"],
+      "answerIndex": 1,
+      "explanation": "Pada membranophone, membran kulit yang dipukul adalah sumber getaran."
+    },
+    {
+      "id": "q4",
+      "question": "Gelombang bunyi di udara termasuk jenis gelombang...",
+      "options": ["Transversal", "Longitudinal", "Elektromagnetik", "Diam (stasioner) saja"],
+      "answerIndex": 1,
+      "explanation": "Di udara, bunyi merambat sebagai gelombang longitudinal berupa rapatan dan renggangan tekanan."
+    },
+    {
+      "id": "q5",
+      "question": "Fungsi resonator pada alat musik adalah...",
+      "options": [
+        "Menghentikan getaran",
+        "Memperkuat getaran menjadi bunyi yang terdengar",
+        "Mengubah warna alat",
+        "Menyimpan udara saja"
+      ],
+      "answerIndex": 1,
+      "explanation": "Resonator memperkuat getaran pada frekuensi tertentu sehingga bunyi terdengar lebih keras dan khas."
+    },
+    {
+      "id": "q6",
+      "question": "Sasando menghasilkan bunyi dari getaran...",
+      "options": ["Kolom udara", "Membran", "Dawai yang dipetik", "Tabung yang beradu"],
+      "answerIndex": 2,
+      "explanation": "Sasando adalah chordophone: dawai yang dipetik bergetar membentuk gelombang transversal."
+    },
+    {
+      "id": "q7",
+      "question": "Apa yang menentukan tinggi-rendahnya nada pada suling?",
+      "options": [
+        "Warna bambu",
+        "Panjang kolom udara yang bergetar",
+        "Berat suling",
+        "Jumlah ukiran"
+      ],
+      "answerIndex": 1,
+      "explanation": "Semakin panjang kolom udara yang bergetar, semakin rendah nadanya — menutup lebih banyak lubang menurunkan nada."
+    },
+    {
+      "id": "q8",
+      "question": "Besaran yang menentukan keras-lemahnya bunyi adalah...",
+      "options": ["Frekuensi", "Amplitudo", "Panjang gelombang", "Medium"],
+      "answerIndex": 1,
+      "explanation": "Amplitudo (besar simpangan getaran) menentukan keras-lemahnya bunyi; frekuensi menentukan tinggi nada."
+    }
+  ]
+}

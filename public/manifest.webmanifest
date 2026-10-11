@@ -1,0 +1,27 @@
+{
+  "name": "AR Alat Musik",
+  "short_name": "AR Musik",
+  "description": "Belajar alat musik tradisional lewat Augmented Reality. Scan gambar, lihat bentuk, konsep bunyi, dan video.",
+  "lang": "id",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#faf6f1",
+  "theme_color": "#0f766e",
+  "categories": ["education"],
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

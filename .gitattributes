@@ -1,0 +1,11 @@
+# Normalize text line endings to LF in the repo; auto-detect binaries.
+* text=auto eol=lf
+
+# Treat media/model assets as binary (no EOL/diff munging).
+*.glb binary
+*.mp4 binary
+*.png binary
+*.webp binary
+*.mind binary
+*.woff binary
+*.woff2 binary

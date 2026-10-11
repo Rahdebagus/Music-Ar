@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AR Alat Musik</title>
+    <!--
+      SPA fallback for static hosts that don't rewrite unknown paths
+      (e.g. GitHub Pages). It stores the requested path and redirects to the
+      app root, where the router restores the intended route.
+      Vercel/Netlify handle this via their own rewrite config instead.
+    -->
+    <script>
+      (function () {
+        try {
+          sessionStorage.setItem('redirectPath', location.pathname + location.search + location.hash);
+        } catch (e) {}
+        var base = '/';
+        location.replace(base);
+      })();
+    </script>
+  </head>
+  <body>
+    Mengalihkan…
+  </body>
+</html>

@@ -1,0 +1,49 @@
+[
+  {
+    "id": "suling-bambu",
+    "name": "Suling Bambu",
+    "region": "Jawa Barat & Bali",
+    "category": "Aerophone",
+    "playMethod": "Ditiup",
+    "soundSource": "Getaran kolom udara",
+    "thumbnail": "/assets/instruments/suling-bambu/thumbnail.webp",
+    "image": "/assets/instruments/suling-bambu/instrument.png",
+    "poster": "/assets/instruments/suling-bambu/poster.webp",
+    "model": "/assets/seruling_bambu.glb",
+    "audio": "/assets/instruments/suling-bambu/sound.mp3",
+    "video": "/assets/seruling-video.mp4",
+    "description": "Suling bambu adalah alat musik tiup tradisional yang terbuat dari seruas bambu dengan beberapa lubang nada. Suaranya lembut dan mengalun, sering mengiringi gamelan atau lagu daerah.",
+    "history": "Suling telah dikenal di Nusantara sejak berabad-abad lalu dan berkembang dalam berbagai bentuk, dari suling Sunda berlubang enam hingga suling Bali. Bambu dipilih karena ringan, mudah dibentuk, dan menghasilkan resonansi yang hangat.",
+    "culturalFunction": "Mengiringi tembang Sunda, karawitan, dan upacara adat. Melodinya dianggap menenangkan dan dekat dengan suasana alam.",
+    "howToPlay": "Tiup lubang tiup di ujung suling sambil menutup dan membuka lubang nada dengan jari untuk mengubah tinggi rendahnya nada. Atur tekanan napas agar nada stabil.",
+    "funFact": "Semakin panjang kolom udara di dalam suling, semakin rendah nada yang dihasilkan — itulah sebabnya menutup lebih banyak lubang menghasilkan nada yang lebih rendah.",
+    "waveConcept": {
+      "waveType": "Gelombang longitudinal",
+      "sourceOfVibration": "Kolom udara di dalam tabung bambu",
+      "resonator": "Rongga tabung bambu",
+      "medium": "Udara",
+      "frequencyNote": "Nada ditentukan oleh panjang kolom udara yang bergetar",
+      "description": "Tiupan udara pada lubang tiup membuat kolom udara di dalam tabung bergetar. Getaran ini menghasilkan perubahan tekanan udara yang merambat keluar sebagai gelombang bunyi longitudinal."
+    },
+    "parts": [
+      {
+        "id": "lubang-tiup",
+        "name": "Lubang Tiup",
+        "description": "Tempat udara ditiupkan sehingga memicu getaran kolom udara.",
+        "position": { "x": -0.42, "y": 0.12, "z": 0.02 }
+      },
+      {
+        "id": "lubang-nada",
+        "name": "Lubang Nada",
+        "description": "Dibuka-tutup dengan jari untuk mengubah panjang kolom udara dan tinggi nada.",
+        "position": { "x": 0.05, "y": 0.02, "z": 0.02 }
+      },
+      {
+        "id": "tabung-resonansi",
+        "name": "Tabung Resonansi",
+        "description": "Badan bambu yang memperkuat getaran udara menjadi bunyi yang terdengar.",
+        "position": { "x": 0.3, "y": -0.05, "z": 0.02 }
+      }
+    ]
+  }
+]

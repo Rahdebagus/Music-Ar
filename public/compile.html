@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kompilasi Target → targets.mind</title>
+    <style>
+      :root { color-scheme: light; }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        background: #faf6f1; color: #1c1917; line-height: 1.5;
+        display: flex; justify-content: center; padding: 24px 16px;
+      }
+      .card {
+        width: 100%; max-width: 520px; background: #fff; border-radius: 20px;
+        padding: 24px; box-shadow: 0 10px 30px -12px rgba(0,0,0,.25);
+      }
+      h1 { font-size: 20px; margin: 0 0 4px; }
+      p { font-size: 14px; color: #57534e; margin: 6px 0; }
+      .preview { width: 100%; border-radius: 14px; margin: 14px 0; border: 1px solid #e7e5e4; }
+      button {
+        width: 100%; border: 0; border-radius: 999px; padding: 14px;
+        font-size: 15px; font-weight: 700; cursor: pointer; color: #fff;
+        background: #0d9488;
+      }
+      button:disabled { opacity: .5; cursor: default; }
+      button.alt { background: #fff; color: #0f766e; border: 1px solid #99f6e4; margin-top: 10px; }
+      .bar { height: 10px; background: #f3e9dd; border-radius: 999px; overflow: hidden; margin: 14px 0 6px; display: none; }
+      .bar > div { height: 100%; width: 0; background: #0d9488; transition: width .2s; }
+      .status { font-size: 13px; color: #0f766e; min-height: 18px; }
+      .ok { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; padding: 12px; border-radius: 12px; font-size: 14px; margin-top: 12px; display: none; }
+      .steps { font-size: 13px; background: #f5f5f4; border-radius: 12px; padding: 12px 14px; margin-top: 14px; }
+      code { background: #e7e5e4; padding: 1px 6px; border-radius: 6px; font-size: 12px; }
+      input[type=file] { font-size: 13px; margin-top: 10px; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>🛠️ Kompilasi Target AR</h1>
+      <p>
+        Alat ini mengubah gambar target menjadi file <code>targets.mind</code>
+        (dipakai MindAR). Kompilasi berjalan di browser ini.
+      </p>
+
+      <img id="preview" class="preview" alt="Gambar target" src="/assets/ar/target-suling.png" />
+
+      <button id="go">⚙️ Kompilasi target bawaan → unduh targets.mind</button>
+
+      <label class="alt" style="display:block; text-align:center; padding:12px; border-radius:999px;">
+        <span>📁 atau pilih gambar sendiri (urut sesuai targetRegistry)</span>
+        <input id="files" type="file" accept="image/*" multiple />
+      </label>
+
+      <div class="bar" id="bar"><div id="fill"></div></div>
+      <div class="status" id="status"></div>
+      <div class="ok" id="ok">
+        ✅ <span class="okmsg">Berhasil.</span>
+      </div>
+
+      <div class="steps">
+        <b>Langkah:</b>
+        <ol style="margin:6px 0 0; padding-left:18px;">
+          <li>Klik tombol di atas &amp; tunggu sampai 100%.</li>
+          <li>Pindahkan <code>targets.mind</code> dari folder Unduhan ke
+            <code>public/assets/ar/</code>.</li>
+          <li>Cetak / tampilkan gambar target, buka menu <b>AR</b>, arahkan kamera.</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- MindAR image build is an ES module (v1.2.5) → import it as a module. -->
+    <script type="module">
+      import { Compiler } from 'https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image.prod.js';
+
+      const $ = (id) => document.getElementById(id);
+      const bar = $('bar'), fill = $('fill'), status = $('status'), ok = $('ok');
+
+      function setProgress(p) {
+        bar.style.display = 'block';
+        fill.style.width = Math.max(0, Math.min(100, p)) + '%';
+        status.textContent = `Memproses… ${p.toFixed(0)}%`;
+      }
+
+      async function saveFile(blob, name) {
+        // Prefer the File System Access API so the user can save straight into
+        // public/assets/ar/ (Chrome/Edge desktop). Fallback: normal download.
+        if (window.showSaveFilePicker) {
+          try {
+            const handle = await window.showSaveFilePicker({
+              suggestedName: name,
+              types: [
+                { description: 'MindAR target', accept: { 'application/octet-stream': ['.mind'] } },
+              ],
+            });
+            const w = await handle.createWritable();
+            await w.write(blob);
+            await w.close();
+            return 'saved';
+          } catch (e) {
+            if (e && e.name === 'AbortError') return 'cancelled';
+            // fall through to download
+          }
+        }
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = name;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        return 'downloaded';
+      }
+
+      function loadImage(src) {
+        return new Promise((res, rej) => {
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.onload = () => res(img);
+          img.onerror = () => rej(new Error('Gagal memuat gambar: ' + src));
+          img.src = src;
+        });
+      }
+
+      async function compile(images) {
+        ok.style.display = 'none';
+        if (typeof Compiler !== 'function') {
+          status.textContent = 'Pustaka MindAR gagal dimuat. Periksa koneksi internet.';
+          return;
+        }
+        $('go').disabled = true;
+        try {
+          const compiler = new Compiler();
+          await compiler.compileImageTargets(images, (p) => setProgress(p));
+          setProgress(100);
+          const buffer = await compiler.exportData();
+          const blob = new Blob([buffer]);
+          const result = await saveFile(blob, 'targets.mind');
+          if (result === 'cancelled') {
+            status.textContent = 'Dibatalkan. Klik lagi untuk menyimpan.';
+            return;
+          }
+          status.textContent = 'Selesai.';
+          ok.querySelector('.okmsg').textContent =
+            result === 'saved'
+              ? 'Tersimpan! Pastikan lokasinya public/assets/ar/targets.mind, lalu buka menu AR.'
+              : 'targets.mind terunduh. Pindahkan ke public/assets/ar/targets.mind, lalu buka menu AR.';
+          ok.style.display = 'block';
+        } catch (e) {
+          console.error(e);
+          status.textContent = 'Gagal: ' + e.message;
+        } finally {
+          $('go').disabled = false;
+        }
+      }
+
+      $('go').addEventListener('click', async () => {
+        status.textContent = 'Memuat gambar target…';
+        const img = await loadImage('/assets/ar/target-suling.png');
+        $('preview').src = img.src;
+        compile([img]);
+      });
+
+      $('files').addEventListener('change', async (e) => {
+        const files = [...e.target.files];
+        if (!files.length) return;
+        status.textContent = `Memuat ${files.length} gambar…`;
+        const imgs = [];
+        for (const f of files) imgs.push(await loadImage(URL.createObjectURL(f)));
+        $('preview').src = imgs[0].src;
+        compile(imgs);
+      });
+    </script>
+  </body>
+</html>

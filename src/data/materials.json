@@ -1,0 +1,77 @@
+[
+  {
+    "id": "mengenal-alat-musik",
+    "code": "A",
+    "title": "Mengenal Alat Musik",
+    "summary": "Bentuk, nama, asal daerah, fungsi, dan bagian-bagian alat musik tradisional.",
+    "icon": "🎼",
+    "sections": [
+      {
+        "heading": "Apa itu alat musik tradisional?",
+        "body": "Alat musik tradisional adalah alat penghasil bunyi yang berkembang dalam budaya suatu daerah. Bentuk, bahan, dan cara memainkannya mencerminkan lingkungan dan kebiasaan masyarakat setempat."
+      },
+      {
+        "heading": "Mengelompokkan alat musik",
+        "body": "Berdasarkan sumber bunyinya, alat musik dibagi menjadi aerophone (udara), idiophone (badan alat), membranophone (membran/kulit), chordophone (dawai), dan electrophone (listrik)."
+      },
+      {
+        "heading": "Bagian-bagian umum",
+        "body": "Sebagian besar alat musik memiliki sumber getaran (yang mulai bergetar), resonator (yang memperkuat getaran), dan bagian kontrol (untuk mengatur nada)."
+      }
+    ]
+  },
+  {
+    "id": "bagaimana-bunyi-terbentuk",
+    "code": "B",
+    "title": "Bagaimana Bunyi Terbentuk",
+    "summary": "Sumber getaran, resonansi, medium rambat, gelombang, frekuensi, dan amplitudo.",
+    "icon": "🌊",
+    "sections": [
+      {
+        "heading": "Getaran menghasilkan bunyi",
+        "body": "Bunyi berasal dari benda yang bergetar — kolom udara, dawai, membran, atau badan alat. Getaran ini menggerakkan partikel udara di sekitarnya."
+      },
+      {
+        "heading": "Gelombang bunyi dan medium",
+        "body": "Getaran merambat melalui medium (biasanya udara) sebagai gelombang bunyi. Tanpa medium, bunyi tidak dapat merambat. Di udara, bunyi berupa gelombang longitudinal: rapatan dan renggangan tekanan."
+      },
+      {
+        "heading": "Resonansi",
+        "body": "Resonator (rongga tabung, badan kayu, wadah) memperkuat getaran pada frekuensi tertentu sehingga bunyi terdengar lebih keras dan khas."
+      },
+      {
+        "heading": "Frekuensi & amplitudo",
+        "body": "Frekuensi menentukan tinggi-rendah nada (diukur dalam Hz) — makin cepat getaran, makin tinggi nada. Amplitudo menentukan keras-lemahnya bunyi — makin besar simpangan, makin keras."
+      },
+      {
+        "heading": "Hubungan bentuk dan bunyi",
+        "body": "Ukuran bagian alat memengaruhi nada: kolom udara/dawai/membran yang lebih panjang atau lebih besar cenderung menghasilkan nada yang lebih rendah."
+      }
+    ]
+  },
+  {
+    "id": "cara-memainkan",
+    "code": "C",
+    "title": "Cara Memainkan",
+    "summary": "Langkah dasar memainkan alat musik: ditiup, dipetik, dipukul, dan digoyangkan.",
+    "icon": "🎵",
+    "sections": [
+      {
+        "heading": "Ditiup (Aerophone)",
+        "body": "Atur napas yang stabil, tiup pada lubang tiup, lalu buka-tutup lubang nada dengan jari untuk mengubah nada. Contoh: suling."
+      },
+      {
+        "heading": "Dipetik (Chordophone)",
+        "body": "Petik dawai dengan jari atau alat petik. Panjang dan ketegangan dawai menentukan nada. Contoh: sasando."
+      },
+      {
+        "heading": "Dipukul (Membranophone/Idiophone)",
+        "body": "Pukul membran atau badan alat pada posisi berbeda untuk nada yang berbeda. Contoh: kendang."
+      },
+      {
+        "heading": "Digoyangkan (Idiophone)",
+        "body": "Goyangkan alat secara teratur agar bagian-bagiannya beradu dan berbunyi. Contoh: angklung."
+      }
+    ]
+  }
+]

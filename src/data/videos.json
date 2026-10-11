@@ -1,0 +1,13 @@
+[
+  {
+    "id": "suling-intro",
+    "instrumentId": "suling-bambu",
+    "title": "Mengenal Suling Bambu",
+    "instrumentName": "Suling Bambu",
+    "type": "Pengenalan",
+    "duration": 95,
+    "poster": "/assets/instruments/suling-bambu/poster.webp",
+    "src": "/assets/seruling-video.mp4",
+    "description": "Pengenalan bentuk, bagian, dan karakter suara suling bambu."
+  }
+]
