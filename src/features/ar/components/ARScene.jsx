@@ -256,7 +256,7 @@ export function ARScene({ lowPerf = false, preferInstrumentId, onExit }) {
           mindar-image={`imageTargetSrc: ${assetUrl(
             TARGETS_MIND_PATH
           )}; autoStart: false; uiLoading: no; uiScanning: no; uiError: no; maxTrack: 1`}
-          renderer="colorManagement: true; toneMapping: none"
+          renderer="colorManagement: true"
           vr-mode-ui="enabled: false"
           device-orientation-permission-ui="enabled: false"
           embedded="true"
