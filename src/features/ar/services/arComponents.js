@@ -4,48 +4,29 @@
  *
  * `ar-model-control` on an <a-gltf-model>:
  *   - On load: replaces materials with a solid, reliably-rendered color
- *     (some PBR textures render as magenta in this three build), centers the
- *     model on the target, and scales it to a consistent (generous) size.
- *   - Touch: one finger drags to rotate, two fingers pinch to scale.
- *   - Mouse (desktop webcam testing): drag to rotate, wheel to scale.
- *   - resetTransform(): back to the fitted default pose.
+ *     (some PBR textures render as magenta in this three build).
+ *   - Applies a fixed base scale + base orientation (kept simple/robust — no
+ *     bounding-box recentering, which previously flung the model off-screen).
+ *   - Touch: one finger rotates, two fingers pinch to scale.
+ *   - Mouse (desktop): drag to rotate, wheel to scale.
+ *   - resetTransform(): back to the default pose.
  */
 export function registerARComponents() {
   const AFRAME = typeof window !== 'undefined' ? window.AFRAME : null;
   if (!AFRAME || AFRAME.components['ar-model-control']) return;
   const THREE = AFRAME.THREE;
 
-  /** Bounding box of `root` in ITS OWN local space (independent of ancestors,
-   *  which may have stale/untracked matrices before the target is found). */
-  function localBox(root) {
-    const box = new THREE.Box3();
-    const tmp = new THREE.Box3();
-    root.updateWorldMatrix(true, true);
-    const inv = new THREE.Matrix4().copy(root.matrixWorld).invert();
-    const m = new THREE.Matrix4();
-    root.traverse((o) => {
-      if (o.isMesh && o.geometry) {
-        if (!o.geometry.boundingBox) o.geometry.computeBoundingBox();
-        tmp.copy(o.geometry.boundingBox);
-        m.multiplyMatrices(inv, o.matrixWorld);
-        tmp.applyMatrix4(m);
-        if (!tmp.isEmpty()) box.union(tmp);
-      }
-    });
-    return box;
-  }
-
   AFRAME.registerComponent('ar-model-control', {
     schema: {
-      fit: { default: 1.8 }, // largest dimension in scene units (bigger = larger)
+      scale: { default: 0.3 }, // fixed base scale (uniform)
       color: { type: 'color', default: '#c9a66b' },
       orient: { type: 'vec3', default: { x: 0, y: 0, z: 90 } },
-      minScale: { default: 0.05 },
-      maxScale: { default: 8 },
+      minScale: { default: 0.03 },
+      maxScale: { default: 10 },
     },
 
     init() {
-      this.base = 0.4;
+      this.base = this.data.scale;
       this.factor = 1;
       this.rotX = 0;
       this.rotY = 0;
@@ -56,20 +37,19 @@ export function registerARComponents() {
       this.dragging = false;
       this._retries = 0;
 
-      this._onLoaded = () => this._setup();
+      this._onLoaded = () => this._onModel();
       this.el.addEventListener('model-loaded', this._onLoaded);
       this._bind();
-      if (this.el.getObject3D('mesh')) this._setup();
+      if (this.el.getObject3D('mesh')) this._onModel();
     },
 
-    _setup() {
+    _onModel() {
       const mesh = this.el.getObject3D('mesh');
       if (!mesh) {
-        if (this._retries++ < 15) setTimeout(() => this._setup(), 150);
+        if (this._retries++ < 15) setTimeout(() => this._onModel(), 150);
         return;
       }
-
-      // 1) Solid material (avoids magenta PBR texture issues).
+      // Solid material avoids magenta PBR texture issues in this three build.
       const solid = new THREE.MeshStandardMaterial({
         color: new THREE.Color(this.data.color),
         roughness: 0.8,
@@ -78,22 +58,12 @@ export function registerARComponents() {
       mesh.traverse((o) => {
         if (o.isMesh) o.material = solid;
       });
-
-      // 2) Center geometry at the entity origin (ancestor-independent).
-      const box = localBox(mesh);
-      if (!box.isEmpty()) {
-        const center = box.getCenter(new THREE.Vector3());
-        const size = box.getSize(new THREE.Vector3());
-        mesh.position.sub(center); // geometry center → entity origin
-        const maxDim = Math.max(size.x, size.y, size.z);
-        if (isFinite(maxDim) && maxDim > 0) this.base = this.data.fit / maxDim;
-      }
       this._apply();
     },
 
     _apply() {
       const obj = this.el.object3D;
-      obj.position.set(0, 0, 0.1); // centered on target, slightly toward camera
+      obj.position.set(0, 0, 0.1);
       const s = this.base * this.factor;
       obj.scale.set(s, s, s);
 
