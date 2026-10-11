@@ -18,6 +18,7 @@ import { ARToolbar } from './ARToolbar.jsx';
 import { ARInfoPopup } from './ARInfoPopup.jsx';
 import { useProgress } from '@/hooks/useProgress.js';
 import { assetUrl } from '@/utils/media.js';
+import { cn } from '@/utils/cn.js';
 import { TARGETS_MIND_PATH } from '../services/targetRegistry.js';
 
 /**
@@ -34,6 +35,7 @@ export function ARScene({ lowPerf = false, preferInstrumentId, onExit }) {
   const [selectedPart, setSelectedPart] = useState(null);
   const [videoPlaying, setVideoPlaying] = useState(false);
   const [muted, setMuted] = useState(false);
+  const [modelStatus, setModelStatus] = useState(''); // '', 'loaded', 'error'
 
   const indices = useMemo(() => getTargetIndices(), []);
   // Any target whose instrument has a video gets a (lazy) hidden <video>,
@@ -112,6 +114,21 @@ export function ARScene({ lowPerf = false, preferInstrumentId, onExit }) {
     };
     scene.addEventListener('click', onClick);
     return () => scene.removeEventListener('click', onClick);
+  }, [sceneMounted, sceneRef]);
+
+  // Diagnostic: track whether the 3D model actually loads (events bubble to
+  // the scene). Surfaced as a small badge so issues are visible on-device.
+  useEffect(() => {
+    const scene = sceneRef.current;
+    if (!scene || !sceneMounted) return;
+    const onLoaded = () => setModelStatus('loaded');
+    const onError = () => setModelStatus('error');
+    scene.addEventListener('model-loaded', onLoaded);
+    scene.addEventListener('model-error', onError);
+    return () => {
+      scene.removeEventListener('model-loaded', onLoaded);
+      scene.removeEventListener('model-error', onError);
+    };
   }, [sceneMounted, sceneRef]);
 
   // Keep the active video element's play state in sync with UI. Works for any
@@ -239,7 +256,7 @@ export function ARScene({ lowPerf = false, preferInstrumentId, onExit }) {
           mindar-image={`imageTargetSrc: ${assetUrl(
             TARGETS_MIND_PATH
           )}; autoStart: false; uiLoading: no; uiScanning: no; uiError: no; maxTrack: 1`}
-          renderer="colorManagement: true; toneMapping: ACESFilmic; exposure: 1"
+          renderer="colorManagement: true; toneMapping: none"
           vr-mode-ui="enabled: false"
           device-orientation-permission-ui="enabled: false"
           embedded="true"
@@ -252,14 +269,13 @@ export function ARScene({ lowPerf = false, preferInstrumentId, onExit }) {
             raycaster="objects: .ar-hotspot; far: 10000"
           ></a-camera>
 
-          {/* Balanced, neutral lighting so the PBR model reads naturally
-              (scenes have no lights by default). */}
-          <a-entity light="type: hemisphere; color: #ffffff; groundColor: #9a8b78; intensity: 0.9"></a-entity>
-          <a-entity light="type: ambient; intensity: 0.5"></a-entity>
-          <a-entity
-            light="type: directional; intensity: 1.0"
-            position="1 2 1"
-          ></a-entity>
+          {/* Bright, even lighting so the model is clearly visible on any
+              device / room (scenes have no lights by default). Virtual lights
+              illuminate the model regardless of the real room's darkness. */}
+          <a-entity light="type: ambient; intensity: 1.6"></a-entity>
+          <a-entity light="type: hemisphere; color: #ffffff; groundColor: #b8a98f; intensity: 1.0"></a-entity>
+          <a-entity light="type: directional; intensity: 1.3" position="1 2 1"></a-entity>
+          <a-entity light="type: directional; intensity: 0.7" position="-1 1 -1"></a-entity>
 
           {indices.map((i) => {
             const cfg = getTargetConfig(i);
@@ -305,11 +321,23 @@ export function ARScene({ lowPerf = false, preferInstrumentId, onExit }) {
           className="pointer-events-auto absolute inset-x-0 top-0 flex items-center justify-between gap-2 px-3"
           style={{ paddingTop: 'calc(0.6rem + var(--safe-top))' }}
         >
-          <span className="rounded-full bg-black/55 px-3 py-1.5 text-sm font-medium text-white backdrop-blur">
-            {activeTarget && modeMeta
-              ? `${modeMeta.icon} ${instrument?.name} · ${modeMeta.label}`
-              : 'Scan Alat Musik'}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="rounded-full bg-black/55 px-3 py-1.5 text-sm font-medium text-white backdrop-blur">
+              {activeTarget && modeMeta
+                ? `${modeMeta.icon} ${instrument?.name} · ${modeMeta.label}`
+                : 'Scan Alat Musik'}
+            </span>
+            {modelStatus && (
+              <span
+                className={cn(
+                  'rounded-full px-2 py-1 text-[10px] font-semibold text-white',
+                  modelStatus === 'loaded' ? 'bg-green-600/80' : 'bg-red-600/80'
+                )}
+              >
+                3D: {modelStatus}
+              </span>
+            )}
+          </div>
           <div className="flex gap-2">
             <button
               type="button"
