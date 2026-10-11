@@ -19,6 +19,9 @@ export function registerARComponents() {
       fit: { default: 0.9 }, // target size (scene units) of the largest dim
       minScale: { default: 0.05 },
       maxScale: { default: 6 },
+      // Base orientation (degrees) applied before user gestures, so the model
+      // has a presentable default pose on the target.
+      orient: { type: 'vec3', default: { x: 0, y: 0, z: 0 } },
     },
 
     init() {
@@ -67,13 +70,18 @@ export function registerARComponents() {
     },
 
     _apply() {
+      const obj = this.el.object3D;
       const s = this.base * this.factor;
-      this.el.object3D.scale.set(s, s, s);
-      this.el.object3D.rotation.set(
-        THREE.MathUtils.degToRad(this.rotX),
-        THREE.MathUtils.degToRad(this.rotY),
-        0
+      obj.scale.set(s, s, s);
+      const d2r = THREE.MathUtils.degToRad;
+      const o = this.data.orient;
+      const base = new THREE.Quaternion().setFromEuler(
+        new THREE.Euler(d2r(o.x), d2r(o.y), d2r(o.z))
       );
+      const gesture = new THREE.Quaternion().setFromEuler(
+        new THREE.Euler(d2r(this.rotX), d2r(this.rotY), 0)
+      );
+      obj.quaternion.copy(base).multiply(gesture);
     },
 
     resetTransform() {

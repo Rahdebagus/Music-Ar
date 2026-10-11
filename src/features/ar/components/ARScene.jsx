@@ -239,8 +239,7 @@ export function ARScene({ lowPerf = false, preferInstrumentId, onExit }) {
           mindar-image={`imageTargetSrc: ${assetUrl(
             TARGETS_MIND_PATH
           )}; autoStart: false; uiLoading: no; uiScanning: no; uiError: no; maxTrack: 1`}
-          color-space="sRGB"
-          renderer="colorManagement: true, physicallyCorrectLights"
+          renderer="colorManagement: true; toneMapping: ACESFilmic; exposure: 1"
           vr-mode-ui="enabled: false"
           device-orientation-permission-ui="enabled: false"
           embedded="true"
@@ -253,11 +252,13 @@ export function ARScene({ lowPerf = false, preferInstrumentId, onExit }) {
             raycaster="objects: .ar-hotspot; far: 10000"
           ></a-camera>
 
-          {/* Lights so PBR 3D models are visible (scenes have none by default). */}
-          <a-entity light="type: ambient; intensity: 1.1"></a-entity>
+          {/* Balanced, neutral lighting so the PBR model reads naturally
+              (scenes have no lights by default). */}
+          <a-entity light="type: hemisphere; color: #ffffff; groundColor: #9a8b78; intensity: 0.9"></a-entity>
+          <a-entity light="type: ambient; intensity: 0.5"></a-entity>
           <a-entity
-            light="type: directional; intensity: 0.9"
-            position="1 1 1"
+            light="type: directional; intensity: 1.0"
+            position="1 2 1"
           ></a-entity>
 
           {indices.map((i) => {
