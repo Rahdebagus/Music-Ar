@@ -51,6 +51,19 @@ export function registerARComponents() {
         if (this._retries++ < 10) setTimeout(() => this._fit(), 150);
         return;
       }
+
+      // Override materials with a solid, reliably-rendered bamboo color.
+      // Some PBR texture setups render as magenta in this three.js build;
+      // a plain MeshStandardMaterial avoids that entirely.
+      const solid = new THREE.MeshStandardMaterial({
+        color: new THREE.Color('#c9a66b'),
+        roughness: 0.8,
+        metalness: 0.0,
+      });
+      mesh.traverse((o) => {
+        if (o.isMesh) o.material = solid;
+      });
+
       const obj = this.el.object3D;
       // Measure at scale 1 so maxDim is in the model's own units.
       obj.scale.set(1, 1, 1);
