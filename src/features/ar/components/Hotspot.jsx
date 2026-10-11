@@ -66,8 +66,9 @@ export function InstrumentOverlay({ instrument }) {
         <a-gltf-model
           src={assetUrl(instrument.model)}
           position="0 0 0.1"
-          scale="0.2 0.2 0.2"
-          ar-model-control="fit: 1.3; orient: 0 0 90"
+          rotation="0 0 90"
+          scale="0.4 0.4 0.4"
+          ar-model-control="fit: 1.8; orient: 0 0 90"
         ></a-gltf-model>
       ) : (
         <>

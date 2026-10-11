@@ -2,32 +2,50 @@
  * Registers custom A-Frame components used by the AR scene.
  * Call once, after A-Frame + MindAR are loaded (see useMindAR).
  *
- * `ar-model-control`:
- *   - On model-loaded: recenters the mesh to the entity origin and scales it
- *     to a consistent size (so any GLB appears centered on the target).
+ * `ar-model-control` on an <a-gltf-model>:
+ *   - On load: replaces materials with a solid, reliably-rendered color
+ *     (some PBR textures render as magenta in this three build), centers the
+ *     model on the target, and scales it to a consistent (generous) size.
  *   - Touch: one finger drags to rotate, two fingers pinch to scale.
  *   - Mouse (desktop webcam testing): drag to rotate, wheel to scale.
- *   - resetTransform(): back to the fitted, upright default.
+ *   - resetTransform(): back to the fitted default pose.
  */
 export function registerARComponents() {
   const AFRAME = typeof window !== 'undefined' ? window.AFRAME : null;
   if (!AFRAME || AFRAME.components['ar-model-control']) return;
   const THREE = AFRAME.THREE;
 
+  /** Bounding box of `root` in ITS OWN local space (independent of ancestors,
+   *  which may have stale/untracked matrices before the target is found). */
+  function localBox(root) {
+    const box = new THREE.Box3();
+    const tmp = new THREE.Box3();
+    root.updateWorldMatrix(true, true);
+    const inv = new THREE.Matrix4().copy(root.matrixWorld).invert();
+    const m = new THREE.Matrix4();
+    root.traverse((o) => {
+      if (o.isMesh && o.geometry) {
+        if (!o.geometry.boundingBox) o.geometry.computeBoundingBox();
+        tmp.copy(o.geometry.boundingBox);
+        m.multiplyMatrices(inv, o.matrixWorld);
+        tmp.applyMatrix4(m);
+        if (!tmp.isEmpty()) box.union(tmp);
+      }
+    });
+    return box;
+  }
+
   AFRAME.registerComponent('ar-model-control', {
     schema: {
-      fit: { default: 0.9 }, // target size (scene units) of the largest dim
+      fit: { default: 1.8 }, // largest dimension in scene units (bigger = larger)
+      color: { type: 'color', default: '#c9a66b' },
+      orient: { type: 'vec3', default: { x: 0, y: 0, z: 90 } },
       minScale: { default: 0.05 },
-      maxScale: { default: 6 },
-      // Base orientation (degrees) applied before user gestures, so the model
-      // has a presentable default pose on the target.
-      orient: { type: 'vec3', default: { x: 0, y: 0, z: 0 } },
+      maxScale: { default: 8 },
     },
 
     init() {
-      // Safe default scale so the model is visible even before (or without) a
-      // successful fit — matches the fallback `scale` attribute.
-      this.base = 0.2;
+      this.base = 0.4;
       this.factor = 1;
       this.rotX = 0;
       this.rotY = 0;
@@ -38,25 +56,22 @@ export function registerARComponents() {
       this.dragging = false;
       this._retries = 0;
 
-      this._onLoaded = () => this._fit();
+      this._onLoaded = () => this._setup();
       this.el.addEventListener('model-loaded', this._onLoaded);
       this._bind();
-      // In case the model was already loaded before this component initialized.
-      if (this.el.getObject3D('mesh')) this._fit();
+      if (this.el.getObject3D('mesh')) this._setup();
     },
 
-    _fit() {
+    _setup() {
       const mesh = this.el.getObject3D('mesh');
       if (!mesh) {
-        if (this._retries++ < 10) setTimeout(() => this._fit(), 150);
+        if (this._retries++ < 15) setTimeout(() => this._setup(), 150);
         return;
       }
 
-      // Override materials with a solid, reliably-rendered bamboo color.
-      // Some PBR texture setups render as magenta in this three.js build;
-      // a plain MeshStandardMaterial avoids that entirely.
+      // 1) Solid material (avoids magenta PBR texture issues).
       const solid = new THREE.MeshStandardMaterial({
-        color: new THREE.Color('#c9a66b'),
+        color: new THREE.Color(this.data.color),
         roughness: 0.8,
         metalness: 0.0,
       });
@@ -64,28 +79,24 @@ export function registerARComponents() {
         if (o.isMesh) o.material = solid;
       });
 
-      const obj = this.el.object3D;
-      // Measure at scale 1 so maxDim is in the model's own units.
-      obj.scale.set(1, 1, 1);
-      obj.updateMatrixWorld(true);
-      const box = new THREE.Box3().setFromObject(mesh);
-      if (box.isEmpty()) {
-        this._apply();
-        return;
+      // 2) Center geometry at the entity origin (ancestor-independent).
+      const box = localBox(mesh);
+      if (!box.isEmpty()) {
+        const center = box.getCenter(new THREE.Vector3());
+        const size = box.getSize(new THREE.Vector3());
+        mesh.position.sub(center); // geometry center → entity origin
+        const maxDim = Math.max(size.x, size.y, size.z);
+        if (isFinite(maxDim) && maxDim > 0) this.base = this.data.fit / maxDim;
       }
-      const size = box.getSize(new THREE.Vector3());
-      const center = box.getCenter(new THREE.Vector3());
-      // Recenter geometry to the entity origin (world center → local).
-      mesh.position.sub(obj.worldToLocal(center.clone()));
-      const maxDim = Math.max(size.x, size.y, size.z);
-      if (isFinite(maxDim) && maxDim > 0) this.base = this.data.fit / maxDim;
       this._apply();
     },
 
     _apply() {
       const obj = this.el.object3D;
+      obj.position.set(0, 0, 0.1); // centered on target, slightly toward camera
       const s = this.base * this.factor;
       obj.scale.set(s, s, s);
+
       const d2r = THREE.MathUtils.degToRad;
       const o = this.data.orient;
       const base = new THREE.Quaternion().setFromEuler(
