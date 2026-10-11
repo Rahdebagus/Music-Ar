@@ -22,7 +22,9 @@ export function registerARComponents() {
     },
 
     init() {
-      this.base = 1;
+      // Safe default scale so the model is visible even before (or without) a
+      // successful fit — matches the fallback `scale` attribute.
+      this.base = 0.2;
       this.factor = 1;
       this.rotX = 0;
       this.rotY = 0;
@@ -31,22 +33,36 @@ export function registerARComponents() {
       this.startDist = 0;
       this.startFactor = 1;
       this.dragging = false;
+      this._retries = 0;
 
       this._onLoaded = () => this._fit();
       this.el.addEventListener('model-loaded', this._onLoaded);
       this._bind();
+      // In case the model was already loaded before this component initialized.
+      if (this.el.getObject3D('mesh')) this._fit();
     },
 
     _fit() {
       const mesh = this.el.getObject3D('mesh');
-      if (!mesh) return;
+      if (!mesh) {
+        if (this._retries++ < 10) setTimeout(() => this._fit(), 150);
+        return;
+      }
+      const obj = this.el.object3D;
+      // Measure at scale 1 so maxDim is in the model's own units.
+      obj.scale.set(1, 1, 1);
+      obj.updateMatrixWorld(true);
       const box = new THREE.Box3().setFromObject(mesh);
+      if (box.isEmpty()) {
+        this._apply();
+        return;
+      }
       const size = box.getSize(new THREE.Vector3());
       const center = box.getCenter(new THREE.Vector3());
-      // Recenter the geometry so transforms pivot around its middle.
-      mesh.position.sub(center);
-      const maxDim = Math.max(size.x, size.y, size.z) || 1;
-      this.base = this.data.fit / maxDim;
+      // Recenter geometry to the entity origin (world center → local).
+      mesh.position.sub(obj.worldToLocal(center.clone()));
+      const maxDim = Math.max(size.x, size.y, size.z);
+      if (isFinite(maxDim) && maxDim > 0) this.base = this.data.fit / maxDim;
       this._apply();
     },
 
